@@ -1,12 +1,11 @@
 {
-  "name": "electron-react-boilerplate",
-  "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
+  "name": "cleaning-mode",
+  "version": "0.0.1",
+  "description": "Activate the cleaning mode and temporarily stop your computer from unwanted keys pressed or touch actions.",
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://github.com/electron-react-boilerplate"
+    "name": "Rortan",
+    "url": "https://github.com/rortan134"
   },
   "main": "./dist/main/main.js",
   "scripts": {
@@ -14,5 +13,9 @@
     "postinstall": "npm run electron-rebuild && npm run link-modules",
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
-  "dependencies": {}
+  "dependencies": {
+    "ffi-napi": "^4.0.3",
+    "ref-struct-napi": "^1.1.1",
+    "win32-api": "^20.0.0"
+  }
 }
