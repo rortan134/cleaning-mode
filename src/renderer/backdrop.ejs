@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline'"
+    />
+    <title>Backdrop</title>
+    <style>
+      @font-face {
+        font-family: 'Segoe-UI';
+        src: url('../../assets/font/Segoe UI.ttf');
+      }
+      @font-face {
+        font-family: 'Segoe-UI-Bold';
+        src: url('../../assets/font/Segoe UI Bold.ttf');
+      }
+      @font-face {
+        font-family: 'Segoe-UI-Italic';
+        src: url('../../assets/font/Segoe UI Italic.ttf');
+      }
+      @font-face {
+        font-family: 'Segoe-UI-Bold-Italic';
+        src: url('../../assets/font/Segoe UI Bold Italic.ttf');
+      }
+
+      * {
+        box-sizing: border-box;
+        color: #fff;
+      }
+
+      body {
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Segoe UI', Segoe-UI;
+      }
+
+      .clean-wrapper-bd,
+      .clean-subtitle-bd,
+      .clean-headline-bd {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .clean-wrapper-bd span {
+        font-size: 12px;
+        color: #a0a0a0;
+        line-height: 130%;
+      }
+
+      #clean-movement-indicator {
+        opacity: 0;
+        transition: opacity 0.2s ease-out;
+      }
+
+      @keyframes show {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes hide {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body id="root">
+    <section class="clean-wrapper-bd" id="test">
+      <div class="clean-headline-bd">
+        <img src="" alt="" />
+        <h1>You are free to clean.</h1>
+      </div>
+      <div class="clean-subtitle-bd">
+        <p>Your keyboard and touchscreen have been disabled.</p>
+        <span id="clean-subtitle">Move your mouse to exit or wait</span>
+      </div>
+      <h2 id="clean-movement-indicator">Move your mouse for</h2>
+    </section>
+  </body>
+</html>
