@@ -5,7 +5,7 @@ import fs from 'fs';
 import webpackPaths from '../configs/webpack.paths';
 
 const mainPath = path.join(webpackPaths.distMainPath, 'main.js');
-const rendererPath = path.join(webpackPaths.distRendererPath, 'renderer.js');
+const rendererPath = path.join(webpackPaths.distRendererPath, `.renderer.js`);
 
 if (!fs.existsSync(mainPath)) {
   throw new Error(
@@ -15,7 +15,12 @@ if (!fs.existsSync(mainPath)) {
   );
 }
 
-if (!fs.existsSync(rendererPath)) {
+const checkRendererPaths = () => {
+  const files = fs.readdirSync(webpackPaths.distRendererPath);
+  return files.some((v) => rendererPath.includes(v));
+};
+
+if (checkRendererPaths()) {
   throw new Error(
     chalk.whiteBright.bgRed.bold(
       'The renderer process is not built yet. Build it by running "npm run build:renderer"'
