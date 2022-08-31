@@ -28,20 +28,20 @@ const user32 = User32.load();
 
 // Winapi Types
 const LONG = is64bit ? ref.types.long : ref.types.int32;
-const ULONG = is64bit ? ref.types.ulong : ref.types.uint32;
+// const ULONG = is64bit ? ref.types.ulong : ref.types.uint32;
 const INT = ref.types.int;
-const UINT = ref.types.uint;
+// const UINT = ref.types.uint;
 const DWORD = ref.types.uint32; // DWORD always is unsigned 32-bit
-const BOOL = ref.types.bool;
+// const BOOL = ref.types.bool;
 
-const HANDLE = is64bit ? ref.types.uint64 : ref.types.uint32;
-const HHOOK = HANDLE;
-const HWND = HANDLE;
-const HINSTANCE = HANDLE;
+// const HANDLE = is64bit ? ref.types.uint64 : ref.types.uint32;
+// const HHOOK = HANDLE;
+// const HWND = HANDLE;
+// const HINSTANCE = HANDLE;
 
 const WPARAM = is64bit ? ref.types.uint64 : ref.types.uint32; // typedef UINT_PTR, uint32(x86) or uint64(64)
-const LPARAM = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR, int32(x86) or int64(64)
-const LRESULT = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR
+// const LPARAM = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR, int32(x86) or int64(64)
+// const LRESULT = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR
 
 const HOOKPROC = 'pointer';
 
@@ -85,37 +85,35 @@ const shellapi = ffi.Library('shell32.dll', {
   SHAppBarMessage: [DWORD, [INT, HOOKPROC]],
 });
 
-const hTaskbarWndBuf =
-  Buffer.from('System_TrayWnd\0', 'ucs2') ||
-  Buffer.from('Shell_TrayWnd\0', 'ucs2');
+const hTaskbarWnd =
+  user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
+  user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
 
-function setTaskbarState(option: AppBarStates) {
-  const hTaskbarWnd = user32.FindWindowExW(0, 0, hTaskbarWndBuf, null);
-
+export function setTaskbarState(option: AppBarStates) {
   const msgData = new APPBARDATA();
   msgData.cbSize = APPBARDATA.size;
   msgData.hWnd = hTaskbarWnd;
   msgData.lParam = option;
-  shellapi.SHAppBarMessage(AppBarMessages.SetState, msgData.ref());
+  return shellapi.SHAppBarMessage(AppBarMessages.SetState, msgData.ref());
 }
 
-function getTaskbarState() {
-  const hTaskbarWnd = user32.FindWindowExW(0, 0, hTaskbarWndBuf, null);
-
+export function getTaskbarState() {
   const msgData = new APPBARDATA();
   msgData.cbSize = APPBARDATA.size;
   msgData.hWnd = hTaskbarWnd;
   return shellapi.SHAppBarMessage(AppBarMessages.GetState, msgData.ref());
 }
 
-function lockTaskbarWithAutohide() {
-  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return; // if doesnt have autohide on
+export function lockTaskbarWithAutohide() {
+  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
   setTaskbarState(AppBarStates.AlwaysOnTop);
+  return true;
 }
 
-function unlockTaskbarWithAutohide() {
-  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return; // if doesnt have autohide on
+export function unlockTaskbarWithAutohide() {
+  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
   setTaskbarState(AppBarStates.AutoHide);
+  return true;
 }
 
 let mainWindow: Menubar | null = null;
@@ -179,7 +177,7 @@ const wndColors = {
   windowText: systemPreferences.getColor('window-text'),
 } as const;
 
-ipcMain.on('get-colors', async (event, arg) => {
+ipcMain.on('get-colors', async (event) => {
   event.reply('get-colors', [wndColors]);
 });
 
@@ -364,7 +362,7 @@ app.setLoginItemSettings({
  * Global Event listeners...
  */
 
-ipcMain.on('activate', (arg, val: boolean[]) => {
+ipcMain.on('activate', (_arg, val: boolean[]) => {
   // send message current state to backdrop window
   backdropWindow?.webContents.send('backdrop', [val[0]]);
 
