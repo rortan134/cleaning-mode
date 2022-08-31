@@ -30,7 +30,6 @@ const configuration: webpack.Configuration = {
   output: {
     path: webpackPaths.srcPath,
     // https://github.com/webpack/webpack/issues/1114
-    filename: '[name].entry.js',
     library: {
       type: 'commonjs2',
     },
