@@ -16,103 +16,103 @@ import {
 } from 'electron';
 import { Menubar, menubar } from 'menubar';
 
-import * as ffi from 'ffi-napi';
-import * as ref from 'ref-napi';
-import { User32 } from 'win32-api';
+// import * as ffi from 'ffi-napi';
+// import * as ref from 'ref-napi';
+// import { User32 } from 'win32-api';
 import { resolveHtmlPath } from './util';
 
-const Struct = require('ref-struct-di')(ref);
+// const Struct = require('ref-struct-di')(ref);
 
 const is64bit = os.arch() === 'x64';
-const user32 = User32.load();
+// const user32 = User32.load();
 
-// Winapi Types
-const LONG = is64bit ? ref.types.long : ref.types.int32;
-// const ULONG = is64bit ? ref.types.ulong : ref.types.uint32;
-const INT = ref.types.int;
-// const UINT = ref.types.uint;
-const DWORD = ref.types.uint32; // DWORD always is unsigned 32-bit
-// const BOOL = ref.types.bool;
+// // Winapi Types
+// const LONG = is64bit ? ref.types.long : ref.types.int32;
+// // const ULONG = is64bit ? ref.types.ulong : ref.types.uint32;
+// const INT = ref.types.int;
+// // const UINT = ref.types.uint;
+// const DWORD = ref.types.uint32; // DWORD always is unsigned 32-bit
+// // const BOOL = ref.types.bool;
 
-// const HANDLE = is64bit ? ref.types.uint64 : ref.types.uint32;
-// const HHOOK = HANDLE;
-// const HWND = HANDLE;
-// const HINSTANCE = HANDLE;
+// // const HANDLE = is64bit ? ref.types.uint64 : ref.types.uint32;
+// // const HHOOK = HANDLE;
+// // const HWND = HANDLE;
+// // const HINSTANCE = HANDLE;
 
-const WPARAM = is64bit ? ref.types.uint64 : ref.types.uint32; // typedef UINT_PTR, uint32(x86) or uint64(64)
-// const LPARAM = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR, int32(x86) or int64(64)
-// const LRESULT = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR
+// const WPARAM = is64bit ? ref.types.uint64 : ref.types.uint32; // typedef UINT_PTR, uint32(x86) or uint64(64)
+// // const LPARAM = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR, int32(x86) or int64(64)
+// // const LRESULT = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR
 
-const HOOKPROC = 'pointer';
+// const HOOKPROC = 'pointer';
 
-// Structures
-const RECT = Struct({
-  left: LONG,
-  top: LONG,
-  right: LONG,
-  bottom: LONG,
-});
+// // Structures
+// const RECT = Struct({
+//   left: LONG,
+//   top: LONG,
+//   right: LONG,
+//   bottom: LONG,
+// });
 
-const APPBARDATA = Struct({
-  cbSize: DWORD,
-  hWnd: WPARAM,
-  uCallbackMessage: DWORD,
-  uEdge: DWORD,
-  rc: RECT,
-  lParam: DWORD,
-});
+// const APPBARDATA = Struct({
+//   cbSize: DWORD,
+//   hWnd: WPARAM,
+//   uCallbackMessage: DWORD,
+//   uEdge: DWORD,
+//   rc: RECT,
+//   lParam: DWORD,
+// });
 
-enum AppBarStates {
-  AutoHide = 0x01,
-  AlwaysOnTop = 0x02,
-}
+// enum AppBarStates {
+//   AutoHide = 0x01,
+//   AlwaysOnTop = 0x02,
+// }
 
-enum AppBarMessages {
-  New = 0x00,
-  Remove = 0x01,
-  QueryPos = 0x02,
-  SetPos = 0x03,
-  GetState = 0x04,
-  GetTaskBarPos = 0x05,
-  Activate = 0x06,
-  GetAutoHideBar = 0x07,
-  SetAutoHideBar = 0x08,
-  WindowPosChanged = 0x09,
-  SetState = 0x0a,
-}
+// enum AppBarMessages {
+//   New = 0x00,
+//   Remove = 0x01,
+//   QueryPos = 0x02,
+//   SetPos = 0x03,
+//   GetState = 0x04,
+//   GetTaskBarPos = 0x05,
+//   Activate = 0x06,
+//   GetAutoHideBar = 0x07,
+//   SetAutoHideBar = 0x08,
+//   WindowPosChanged = 0x09,
+//   SetState = 0x0a,
+// }
 
-const shellapi = ffi.Library('shell32.dll', {
-  SHAppBarMessage: [DWORD, [INT, HOOKPROC]],
-});
+// const shellapi = ffi.Library('shell32.dll', {
+//   SHAppBarMessage: [DWORD, [INT, HOOKPROC]],
+// });
 
-const hTaskbarWnd =
-  user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
-  user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
+// const hTaskbarWnd =
+//   user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
+//   user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
 
-export function setTaskbarState(option: AppBarStates) {
-  const msgData = new APPBARDATA();
-  msgData.cbSize = APPBARDATA.size;
-  msgData.hWnd = hTaskbarWnd;
-  msgData.lParam = option;
-  return shellapi.SHAppBarMessage(AppBarMessages.SetState, msgData.ref());
-}
+// export function setTaskbarState(option: AppBarStates) {
+//   const msgData = new APPBARDATA();
+//   msgData.cbSize = APPBARDATA.size;
+//   msgData.hWnd = hTaskbarWnd;
+//   msgData.lParam = option;
+//   return shellapi.SHAppBarMessage(AppBarMessages.SetState, msgData.ref());
+// }
 
-export function getTaskbarState() {
-  const msgData = new APPBARDATA();
-  msgData.cbSize = APPBARDATA.size;
-  msgData.hWnd = hTaskbarWnd;
-  return shellapi.SHAppBarMessage(AppBarMessages.GetState, msgData.ref());
-}
+// export function getTaskbarState() {
+//   const msgData = new APPBARDATA();
+//   msgData.cbSize = APPBARDATA.size;
+//   msgData.hWnd = hTaskbarWnd;
+//   return shellapi.SHAppBarMessage(AppBarMessages.GetState, msgData.ref());
+// }
 
 export function lockTaskbarWithAutohide() {
-  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
-  setTaskbarState(AppBarStates.AlwaysOnTop);
+  // if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
+  // setTaskbarState(AppBarStates.AlwaysOnTop);
   return true;
 }
 
 export function unlockTaskbarWithAutohide() {
-  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
-  setTaskbarState(AppBarStates.AutoHide);
+  // if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
+  // setTaskbarState(AppBarStates.AutoHide);
   return true;
 }
 
@@ -248,8 +248,8 @@ const createWindow = async () => {
       titleBarStyle: 'hidden',
       webPreferences: {
         backgroundThrottling: false,
-        sandbox: false,
         devTools: !app.isPackaged,
+        sandbox: false,
         preload: app.isPackaged
           ? path.join(__dirname, 'preload.js')
           : path.join(__dirname, '../../.erb/dll/preload.js'),
@@ -277,6 +277,7 @@ const createWindow = async () => {
     titleBarStyle: 'hidden',
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      devTools: !app.isPackaged,
       sandbox: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')

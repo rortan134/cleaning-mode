@@ -16,7 +16,7 @@ const Toolbar = () => {
 };
 
 const Layout = (props: PropsWithChildren) => {
-  const { children, ...rest } = props;
+  const { children } = props;
 
   return (
     <div className="clean-container noselect">

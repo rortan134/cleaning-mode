@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "ffi-napi": "^4.0.3",
-    "ref-struct-napi": "^1.1.1",
+    "playwright": "^1.25.1",
+    "ref-struct-di": "^1.1.1",
     "win32-api": "^20.0.0"
   }
 }
