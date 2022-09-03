@@ -1,6 +1,6 @@
 {
   "name": "cleaning-mode",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Activate the cleaning mode and temporarily stop your computer from unwanted keys pressed or touch actions.",
   "license": "MIT",
   "author": {
