@@ -150,7 +150,6 @@
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-react": "^7.31.4",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "ffi-napi": "^4.0.3",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^8.0.1",
@@ -159,12 +158,9 @@
     "jest-environment-jsdom": "^28.1.3",
     "lint-staged": "^13.0.3",
     "mini-css-extract-plugin": "^2.6.1",
-    "node-gyp": "^9.1.0",
-    "playwright": "^1.25.1",
     "prettier": "^2.7.1",
     "react-refresh": "^0.14.0",
     "react-test-renderer": "^18.2.0",
-    "ref-struct-di": "^1.1.1",
     "rimraf": "^3.0.2",
     "sass": "^1.54.8",
     "sass-loader": "^13.0.2",
@@ -179,8 +175,7 @@
     "webpack-bundle-analyzer": "^4.6.1",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.10.1",
-    "webpack-merge": "^5.8.0",
-    "win32-api": "^20.1.0"
+    "webpack-merge": "^5.8.0"
   },
   "build": {
     "productName": "CleaningMode",
