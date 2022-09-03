@@ -72,6 +72,7 @@ const ActivateBtn = () => {
   return (
     <button
       type="button"
+      id="activate-mode"
       className={`clean-activate-mode ${active ? 'active' : ''}`}
       onClick={toggleState}
     >

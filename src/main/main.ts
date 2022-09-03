@@ -16,105 +16,212 @@ import {
 } from 'electron';
 import { Menubar, menubar } from 'menubar';
 
-// import * as ffi from 'ffi-napi';
-// import * as ref from 'ref-napi';
-// import { User32 } from 'win32-api';
+import * as ffi from 'ffi-napi';
+import * as ref from 'ref-napi';
+import { User32 } from 'win32-api';
 import { resolveHtmlPath } from './util';
 
-// const Struct = require('ref-struct-di')(ref);
+const Struct = require('ref-struct-di')(ref);
 
 const is64bit = os.arch() === 'x64';
-// const user32 = User32.load();
+const user32 = User32.load(['FindWindowExW']);
 
-// // Winapi Types
-// const LONG = is64bit ? ref.types.long : ref.types.int32;
-// // const ULONG = is64bit ? ref.types.ulong : ref.types.uint32;
-// const INT = ref.types.int;
-// // const UINT = ref.types.uint;
-// const DWORD = ref.types.uint32; // DWORD always is unsigned 32-bit
-// // const BOOL = ref.types.bool;
+/*
+  WinAPI types
+*/
 
-// // const HANDLE = is64bit ? ref.types.uint64 : ref.types.uint32;
-// // const HHOOK = HANDLE;
-// // const HWND = HANDLE;
-// // const HINSTANCE = HANDLE;
+const LONG = is64bit ? ref.types.long : ref.types.int32;
+const ULONG = is64bit ? ref.types.ulong : ref.types.uint32;
+const INT = ref.types.int;
+// const UINT = ref.types.uint;
+const DWORD = ref.types.uint32; // DWORD always is unsigned 32-bit
+const BOOL = ref.types.bool;
 
-// const WPARAM = is64bit ? ref.types.uint64 : ref.types.uint32; // typedef UINT_PTR, uint32(x86) or uint64(64)
-// // const LPARAM = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR, int32(x86) or int64(64)
-// // const LRESULT = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR
+const HANDLE = is64bit ? ref.types.uint64 : ref.types.uint32;
+const BYTE = ref.types.byte;
+const HHOOK = HANDLE;
+// const HWND = HANDLE;
+const HINSTANCE = HANDLE;
 
-// const HOOKPROC = 'pointer';
+const WPARAM = is64bit ? ref.types.uint64 : ref.types.uint32; // typedef UINT_PTR, uint32(x86) or uint64(64)
+const LPARAM = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR, int32(x86) or int64(64)
+const LRESULT = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR
 
-// // Structures
-// const RECT = Struct({
-//   left: LONG,
-//   top: LONG,
-//   right: LONG,
-//   bottom: LONG,
-// });
+const HOOKPROC = 'pointer';
 
-// const APPBARDATA = Struct({
-//   cbSize: DWORD,
-//   hWnd: WPARAM,
-//   uCallbackMessage: DWORD,
-//   uEdge: DWORD,
-//   rc: RECT,
-//   lParam: DWORD,
-// });
+/*
+  Structs
+*/
 
-// enum AppBarStates {
-//   AutoHide = 0x01,
-//   AlwaysOnTop = 0x02,
-// }
+const RECT = Struct({
+  left: LONG,
+  top: LONG,
+  right: LONG,
+  bottom: LONG,
+});
 
-// enum AppBarMessages {
-//   New = 0x00,
-//   Remove = 0x01,
-//   QueryPos = 0x02,
-//   SetPos = 0x03,
-//   GetState = 0x04,
-//   GetTaskBarPos = 0x05,
-//   Activate = 0x06,
-//   GetAutoHideBar = 0x07,
-//   SetAutoHideBar = 0x08,
-//   WindowPosChanged = 0x09,
-//   SetState = 0x0a,
-// }
+const APPBARDATA = Struct({
+  cbSize: DWORD,
+  hWnd: WPARAM,
+  uCallbackMessage: DWORD,
+  uEdge: DWORD,
+  rc: RECT,
+  lParam: DWORD,
+});
 
-// const shellapi = ffi.Library('shell32.dll', {
-//   SHAppBarMessage: [DWORD, [INT, HOOKPROC]],
-// });
+const KBDLLHOOKSTRUCT = Struct({
+  vkCode: DWORD,
+  scanCode: DWORD,
+  flags: DWORD,
+  time: DWORD,
+  dwExtraInfo: ULONG,
+});
 
-// const hTaskbarWnd =
-//   user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
-//   user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
+enum AppBarStates {
+  AutoHide = 0x01,
+  AlwaysOnTop = 0x02,
+}
 
-// export function setTaskbarState(option: AppBarStates) {
-//   const msgData = new APPBARDATA();
-//   msgData.cbSize = APPBARDATA.size;
-//   msgData.hWnd = hTaskbarWnd;
-//   msgData.lParam = option;
-//   return shellapi.SHAppBarMessage(AppBarMessages.SetState, msgData.ref());
-// }
+enum AppBarMessages {
+  New = 0x00,
+  Remove = 0x01,
+  QueryPos = 0x02,
+  SetPos = 0x03,
+  GetState = 0x04,
+  GetTaskBarPos = 0x05,
+  Activate = 0x06,
+  GetAutoHideBar = 0x07,
+  SetAutoHideBar = 0x08,
+  WindowPosChanged = 0x09,
+  SetState = 0x0a,
+}
 
-// export function getTaskbarState() {
-//   const msgData = new APPBARDATA();
-//   msgData.cbSize = APPBARDATA.size;
-//   msgData.hWnd = hTaskbarWnd;
-//   return shellapi.SHAppBarMessage(AppBarMessages.GetState, msgData.ref());
-// }
+const shell32 = ffi.Library('shell32.dll', {
+  SHAppBarMessage: [DWORD, [INT, HOOKPROC]],
+});
 
-export function lockTaskbarWithAutohide() {
-  // if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
-  // setTaskbarState(AppBarStates.AlwaysOnTop);
+const user32extended = ffi.Library('user32.dll', {
+  keybd_event: [ref.types.void, [BYTE, BYTE, DWORD, ULONG]],
+  [is64bit ? 'SetWindowsHookExW' : 'SetWindowsHookExA']: [
+    HHOOK,
+    [INT, HOOKPROC, HINSTANCE, DWORD],
+  ],
+  UnhookWindowsHookEx: [BOOL, [HHOOK]],
+  CallNextHookEx: [LRESULT, [HHOOK, INT, WPARAM, LPARAM]],
+});
+
+/*
+  WinAPI logic
+*/
+
+type Param<T> = T extends ref.Type<infer U> ? U : never;
+
+// Taskbar
+const hTaskbarWnd =
+  user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
+  user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
+
+function setTaskbarState(option: AppBarStates) {
+  const msgData = new APPBARDATA();
+  msgData.cbSize = APPBARDATA.size;
+  msgData.hWnd = hTaskbarWnd;
+  msgData.lParam = option;
+  return shell32.SHAppBarMessage(AppBarMessages.SetState, msgData.ref());
+}
+
+function getTaskbarState() {
+  const msgData = new APPBARDATA();
+  msgData.cbSize = APPBARDATA.size;
+  msgData.hWnd = hTaskbarWnd;
+  return shell32.SHAppBarMessage(AppBarMessages.GetState, msgData.ref());
+}
+
+function lockTaskbarWithAutohide() {
+  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
+  setTaskbarState(AppBarStates.AlwaysOnTop);
   return true;
 }
 
-export function unlockTaskbarWithAutohide() {
-  // if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
-  // setTaskbarState(AppBarStates.AutoHide);
+function unlockTaskbarWithAutohide() {
+  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
+  setTaskbarState(AppBarStates.AutoHide);
   return true;
 }
+
+// Keyboard
+const HC_ACTION = 0; // to check if is valid key
+const WM_SYSKEYDOWN = 0x0104 as Param<typeof DWORD>;
+const WM_KEYUP = 0x0101 as Param<typeof DWORD>;
+const KEYEVENTF_KEYUP = 0x0002 as Param<typeof DWORD>;
+const KEYEVENTF_EXTENDEDKEY = 0x0001 as Param<typeof DWORD>;
+const VK_LCONTROL: Param<typeof BYTE> = 0x11; // ctrl key
+
+let hHook: Param<typeof HHOOK> = 0;
+
+const lowLevelKeyboardProc = ffi.Callback(
+  LRESULT,
+  [INT, WPARAM, ref.refType(KBDLLHOOKSTRUCT)],
+  (
+    nCode: Param<typeof INT>,
+    wParam: Param<typeof WPARAM>,
+    lParam: ref.Pointer<typeof LPARAM>
+  ) => {
+    if (nCode === HC_ACTION) {
+      const bScan: Param<typeof BYTE> = 0x1d;
+
+      switch (wParam) {
+        case WM_SYSKEYDOWN: {
+          user32extended.keybd_event(
+            VK_LCONTROL,
+            bScan,
+            KEYEVENTF_EXTENDEDKEY || 0,
+            0
+          );
+          break;
+        }
+        case WM_KEYUP: {
+          user32extended.keybd_event(
+            VK_LCONTROL,
+            bScan,
+            KEYEVENTF_EXTENDEDKEY || KEYEVENTF_KEYUP,
+            0
+          );
+          return 1;
+        }
+        default:
+          // eslint-disable-next-line no-param-reassign
+          wParam = WM_SYSKEYDOWN;
+          break;
+      }
+      return 1;
+    }
+    return user32extended.CallNextHookEx(
+      hHook,
+      nCode,
+      wParam,
+      ref.address(lParam.ref())
+    );
+  }
+);
+
+const disableKeyboard = () => {
+  const WH_KEYBOARD_LL: Param<typeof INT> = 13;
+
+  hHook = user32extended[is64bit ? 'SetWindowsHookExW' : 'SetWindowsHookExA'](
+    WH_KEYBOARD_LL,
+    lowLevelKeyboardProc as ref.Pointer<Buffer>,
+    0,
+    0
+  ) as Param<typeof HHOOK>;
+};
+
+const enableKeyboard = () => {
+  return user32extended.UnhookWindowsHookEx(hHook);
+};
+
+/*
+  Electron logic
+*/
 
 let mainWindow: Menubar | null = null;
 let backdropWindow: BrowserWindow | null = null;
@@ -183,18 +290,22 @@ ipcMain.on('get-colors', async (event) => {
 
 const contextMenu = Menu.buildFromTemplate([
   {
+    id: 'open-menu-option',
     label: 'Open',
     click: () => {
       mainWindow?.showWindow();
     },
     type: 'normal',
+    role: 'window',
   },
   {
+    id: 'quit-menu-option',
     label: 'Quit',
     click: () => {
       app.quit();
     },
     type: 'normal',
+    role: 'window',
   },
 ]);
 
@@ -250,9 +361,10 @@ const createWindow = async () => {
         backgroundThrottling: false,
         devTools: !app.isPackaged,
         sandbox: false,
-        preload: app.isPackaged
-          ? path.join(__dirname, 'preload.js')
-          : path.join(__dirname, '../../.erb/dll/preload.js'),
+        preload:
+          app.isPackaged && !isDebug
+            ? path.join(__dirname, 'preload.js')
+            : path.join(__dirname, '../../.erb/dll/preload.js'),
       },
     },
   });
@@ -279,12 +391,14 @@ const createWindow = async () => {
     webPreferences: {
       devTools: !app.isPackaged,
       sandbox: false,
-      preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
+      preload:
+        app.isPackaged || !isDebug
+          ? path.join(__dirname, 'preload.js')
+          : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
   backdropWindow.loadURL(resolveHtmlPath('backdrop.html'));
+  backdropWindow.setMenu(contextMenu);
 
   /**
    * Event listeners...
@@ -341,6 +455,8 @@ const createWindow = async () => {
 
   mainWindow.on('after-close', () => {
     mainWindow = null;
+    unlockTaskbarWithAutohide();
+    enableKeyboard();
   });
 };
 
@@ -370,8 +486,12 @@ ipcMain.on('activate', (_arg, val: boolean[]) => {
   if (val[0] === true) {
     // if button is active
     activateBackdrop();
+    unlockTaskbarWithAutohide();
+    disableKeyboard();
   } else {
     hideBackdrop();
+    unlockTaskbarWithAutohide();
+    enableKeyboard();
   }
 });
 
