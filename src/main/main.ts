@@ -118,6 +118,7 @@ type Param<T> = T extends ref.Type<infer U> ? U : never;
 
 // Taskbar
 // Todo: find better way to do this
+// https://github.com/maxogden/menubar/issues/380
 const hTaskbarWnd =
   user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
   user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
@@ -361,7 +362,6 @@ const createWindow = async () => {
       resizable: false,
       transparent: true,
       minimizable: false,
-      alwaysOnTop: true,
       title: 'Cleaning Mode',
       titleBarStyle: 'hidden',
       webPreferences: {
@@ -404,6 +404,7 @@ const createWindow = async () => {
           : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
+
   backdropWindow.loadURL(resolveHtmlPath('backdrop.html'));
   backdropWindow.setMenu(contextMenu);
 
@@ -433,18 +434,13 @@ const createWindow = async () => {
     });
 
     mainWindow?.on('show', () => {
+      lockTaskbarWithAutohide(); // will ignore if doesnt have taskbar with autohide on
       window.webContents.send('show'); // trigger animation
-      lockTaskbarWithAutohide(); // reposition
     });
 
-    mainWindow?.on('focus-lost', () => {
-      window.webContents.send('hide');
+    mainWindow?.on('hide', () => {
       unlockTaskbarWithAutohide();
-
-      setTimeout(() => {
-        // wait for hiding animation to complete
-        mainWindow?.hideWindow();
-      }, 100);
+      window.webContents.send('hide');
     });
   });
 
@@ -489,15 +485,14 @@ app.setLoginItemSettings({
 ipcMain.on('activate', (_arg, val: boolean[]) => {
   // send message current state to backdrop window
   backdropWindow?.webContents.send('backdrop', [val[0]]);
+  unlockTaskbarWithAutohide();
 
   if (val[0] === true) {
     // if button is active
     activateBackdrop();
-    unlockTaskbarWithAutohide();
     disableKeyboard();
   } else {
     hideBackdrop();
-    unlockTaskbarWithAutohide();
     enableKeyboard();
   }
 });
