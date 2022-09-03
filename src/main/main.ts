@@ -117,6 +117,7 @@ const user32extended = ffi.Library('user32.dll', {
 type Param<T> = T extends ref.Type<infer U> ? U : never;
 
 // Taskbar
+// Todo: find better way to do this
 const hTaskbarWnd =
   user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
   user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
@@ -136,16 +137,22 @@ function getTaskbarState() {
   return shell32.SHAppBarMessage(AppBarMessages.GetState, msgData.ref());
 }
 
+let hadAutohide = false;
+
 function lockTaskbarWithAutohide() {
-  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
+  if (getTaskbarState() !== AppBarStates.AutoHide) {
+    return; // if doesnt have autohide on
+  }
   setTaskbarState(AppBarStates.AlwaysOnTop);
-  return true;
+  hadAutohide = true;
 }
 
 function unlockTaskbarWithAutohide() {
-  if (getTaskbarState() === AppBarStates.AlwaysOnTop) return false; // if doesnt have autohide on
+  if (!hadAutohide) {
+    return;
+  }
   setTaskbarState(AppBarStates.AutoHide);
-  return true;
+  hadAutohide = false;
 }
 
 // Keyboard
