@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "ffi-napi": "^4.0.3",
+    "ref-napi": "^3.0.3",
     "ref-struct-di": "^1.1.1",
+    "ref-union-di": "^1.0.1",
     "win32-api": "^20.0.0"
   }
 }
