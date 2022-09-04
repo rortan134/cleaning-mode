@@ -1,4 +1,8 @@
 /* eslint-disable no-console */
+// https://github.com/spaceagetv/electron-playwright-example/blob/master/e2e-tests/main.spec.ts
+
+import path from 'path';
+
 import {
   test,
   expect,
@@ -6,40 +10,80 @@ import {
   Page,
   ElectronApplication,
 } from '@playwright/test';
-import path from 'path';
+import clickMenuItemById from './helpers';
 
 test.describe.serial(() => {
-  let page: Page;
   let electronApp: ElectronApplication;
+
   test.beforeAll(async () => {
     electronApp = await electron.launch({
       args: [
         path.join(__dirname, '..', 'release', 'app', 'dist', 'main', 'main.js'),
       ],
     });
-    page = await electronApp.firstWindow();
-    // Direct Electron console to Node terminal.
-    page.on('console', console.log);
+
+    electronApp.on('window', async (page) => {
+      const filename = page.url()?.split('/').pop();
+      console.log(`Window opened: ${filename}`);
+
+      // capture errors
+      page.on('pageerror', (error) => {
+        console.error(error);
+      });
+      // capture console messages
+      page.on('console', (msg) => {
+        console.log(msg.text());
+      });
+    });
   });
 
   test.afterAll(async () => {
     await electronApp.close();
   });
 
-  test('Electron App has the correct buttons on it', async () => {
-    // Evaluation expression in the Electron context.
-    const appPath = await electronApp.evaluate(async ({ app }) => {
-      // This runs in the main Electron process, parameter here is always
-      // the result of the require('electron') in the main app script.
-      return app.getAppPath();
-    });
-    console.log(appPath);
+  let window: Page;
 
-    // Print the title.
-    console.log(await page.title());
+  // test('Clicking on tray triggers IPC opening slide animation', async () => {
+  //   electronApp.evaluate(({ ipcRenderer }) => {
+  //     ipcRenderer.emit('show');
+  //   });
+  //   const newwindow = await electronApp.waitForEvent('window');
+  //   expect(newwindow).toBeTruthy();
+  //   expect(await newwindow.title()).toBe('Window 3');
+  //   window = newwindow;
+  // });
 
-    await expect(page.locator('text=Cleaning Mode')).toBeVisible();
-    await expect(page.locator('text=Ready to clean?')).toBeVisible();
-    await expect(page.locator('text=Activate')).toBeVisible();
+  test('Tray interface renders correctly', async () => {
+    await clickMenuItemById(electronApp, 'open-menu-option');
+    const newWindow = await electronApp.waitForEvent('window');
+    window = newWindow;
+    expect(window).toBeTruthy();
+    expect(await window.title()).toBe('Cleaning Mode');
+
+    await window.waitForSelector('h1');
+    const text = await window.$eval('h1', (el) => el.textContent);
+    expect(text).toBe('Cleaning Mode');
+
+    await expect(window.locator('text=Ready to clean?')).toBeVisible();
+    await expect(window.locator('text=Activate')).toBeVisible();
   });
+
+  test('Activate button creates new backdrop window', async () => {
+    await window.click('#activate-mode');
+    const newWindow = await electronApp.waitForEvent('window');
+    expect(newWindow).toBeTruthy();
+    window = newWindow;
+  });
+
+  test('Backdrop window renders correctly', async () => {
+    const title = await window.title();
+    expect(title).toBe('Backdrop');
+
+    await expect(window.locator('text=You are free to clean.')).toBeVisible();
+  });
+
+  /* todo:
+  - test color scheme?
+  - test winapi taskbar behavior (if it )
+  */
 });
