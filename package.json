@@ -107,7 +107,7 @@
     "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.25.1",
+    "@playwright/test": "^1.29.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@testing-library/jest-dom": "^5.16.5",
