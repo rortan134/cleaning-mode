@@ -109,7 +109,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
+    "@testing-library/react": "^14.0.0",
     "@types/ffi-napi": "^4.0.7",
     "@types/jest": "^28.1.8",
     "@types/node": "^18.11.18",
