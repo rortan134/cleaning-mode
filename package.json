@@ -120,7 +120,7 @@
     "@types/terser-webpack-plugin": "^5.0.4",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@typescript-eslint/eslint-plugin": "^5.47.1",
-    "@typescript-eslint/parser": "^5.47.1",
+    "@typescript-eslint/parser": "^5.53.0",
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^5.2.0",
     "concurrently": "^7.6.0",
