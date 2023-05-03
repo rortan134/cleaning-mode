@@ -423,12 +423,14 @@ const createWindow = async () => {
       return { action: 'deny' };
     });
 
-    mainWindow?.on('show', () => {
+    if (!mainWindow) return;
+
+    mainWindow.on('show', () => {
       lockTaskbarWithAutohide(); // will ignore if doesnt have taskbar with autohide on
       window.webContents.send('show'); // trigger animation
     });
 
-    mainWindow?.on('hide', () => {
+    mainWindow.on('hide', () => {
       unlockTaskbarWithAutohide();
       window.webContents.send('hide');
     });
@@ -469,9 +471,8 @@ app.setLoginItemSettings({
 });
 
 /**
- * Global Event listeners...
+ * Global listeners...
  */
-
 ipcMain.on('activate', (_arg, val: boolean[]) => {
   // send message current state to backdrop window
   backdropWindow?.webContents.send('backdrop', [val[0]]);
