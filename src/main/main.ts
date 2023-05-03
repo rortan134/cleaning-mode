@@ -44,20 +44,17 @@ const HINSTANCE = HANDLE;
 const WPARAM = is64bit ? ref.types.uint64 : ref.types.uint32; // typedef UINT_PTR, uint32(x86) or uint64(64)
 const LPARAM = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR, int32(x86) or int64(64)
 const LRESULT = is64bit ? ref.types.int64 : ref.types.int32; // typedef LONG_PTR
-
 const HOOKPROC = 'pointer';
 
 /*
   Structs
 */
-
 const RECT = Struct({
   left: LONG,
   top: LONG,
   right: LONG,
   bottom: LONG,
 });
-
 const APPBARDATA = Struct({
   cbSize: DWORD,
   hWnd: WPARAM,
@@ -66,7 +63,6 @@ const APPBARDATA = Struct({
   rc: RECT,
   lParam: DWORD,
 });
-
 const KBDLLHOOKSTRUCT = Struct({
   vkCode: DWORD,
   scanCode: DWORD,
@@ -74,12 +70,10 @@ const KBDLLHOOKSTRUCT = Struct({
   time: DWORD,
   dwExtraInfo: ULONG,
 });
-
 enum AppBarStates {
   AutoHide = 0x01,
   AlwaysOnTop = 0x02,
 }
-
 enum AppBarMessages {
   New = 0x00,
   Remove = 0x01,
@@ -93,11 +87,9 @@ enum AppBarMessages {
   WindowPosChanged = 0x09,
   SetState = 0x0a,
 }
-
 const shell32 = ffi.Library('shell32.dll', {
   SHAppBarMessage: [DWORD, [INT, HOOKPROC]],
 });
-
 const user32extended = ffi.Library('user32.dll', {
   keybd_event: [ref.types.void, [BYTE, BYTE, DWORD, ULONG]],
   [is64bit ? 'SetWindowsHookExW' : 'SetWindowsHookExA']: [
