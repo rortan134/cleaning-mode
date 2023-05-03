@@ -167,6 +167,7 @@ body {
     transform: translateY(0);
   }
 }
+
 @keyframes hide {
   from {
     opacity: 1;

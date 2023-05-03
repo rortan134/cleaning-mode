@@ -2,7 +2,6 @@
 /**
  * Electron's main process.
  */
-
 import os from 'os';
 import path from 'path';
 import {
@@ -29,7 +28,6 @@ const user32 = User32.load(['FindWindowExW']);
 /*
   WinAPI types
 */
-
 const LONG = is64bit ? ref.types.long : ref.types.int32;
 const ULONG = is64bit ? ref.types.ulong : ref.types.uint32;
 const INT = ref.types.int;
@@ -112,13 +110,14 @@ const user32extended = ffi.Library('user32.dll', {
 
 /*
   WinAPI logic
-*/
-
+  */
 type Param<T> = T extends ref.Type<infer U> ? U : never;
 
-// Taskbar
-// Todo: find better way to do this
-// https://github.com/maxogden/menubar/issues/380
+/**
+ * Handle taskbar positioning
+ * Todo: find better way to do this
+ * @see https://github.com/maxogden/menubar/issues/380
+ */
 const hTaskbarWnd =
   user32.FindWindowExW(0, 0, Buffer.from('System_TrayWnd\0', 'ucs2'), null) ||
   user32.FindWindowExW(0, 0, Buffer.from('Shell_TrayWnd\0', 'ucs2'), null);
@@ -176,7 +175,6 @@ const lowLevelKeyboardProc = ffi.Callback(
   ) => {
     if (nCode === HC_ACTION) {
       const bScan: Param<typeof BYTE> = 0x1d;
-
       switch (wParam) {
         case WM_SYSKEYDOWN: {
           user32extended.keybd_event(
@@ -214,7 +212,6 @@ const lowLevelKeyboardProc = ffi.Callback(
 
 const disableKeyboard = () => {
   const WH_KEYBOARD_LL: Param<typeof INT> = 13;
-
   hHook = user32extended[is64bit ? 'SetWindowsHookExW' : 'SetWindowsHookExA'](
     WH_KEYBOARD_LL,
     lowLevelKeyboardProc as ref.Pointer<Buffer>,
@@ -230,7 +227,6 @@ const enableKeyboard = () => {
 /*
   Electron logic
 */
-
 let mainWindow: Menubar | null = null;
 let backdropWindow: BrowserWindow | null = null;
 
@@ -239,10 +235,10 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDebug =
+const isDev =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (isDebug) {
+if (isDev) {
   require('electron-debug')();
 }
 
@@ -321,7 +317,6 @@ function activateBackdrop() {
   if (!backdropWindow) {
     throw new Error('Backdrop window is not defined');
   }
-
   backdropWindow.setKiosk(true);
   backdropWindow.maximize();
   backdropWindow.show();
@@ -331,12 +326,15 @@ function activateBackdrop() {
 }
 
 function hideBackdrop() {
-  backdropWindow?.minimize();
-  backdropWindow?.hide();
+  if (!backdropWindow) {
+    throw new Error('Backdrop window is not defined');
+  }
+  backdropWindow.minimize();
+  backdropWindow.hide();
 }
 
 const createWindow = async () => {
-  if (isDebug) {
+  if (isDev) {
     await installExtensions();
   }
 
@@ -369,7 +367,7 @@ const createWindow = async () => {
         devTools: !app.isPackaged,
         sandbox: false,
         preload:
-          app.isPackaged && !isDebug
+          app.isPackaged && !isDev
             ? path.join(__dirname, 'preload.js')
             : path.join(__dirname, '../../.erb/dll/preload.js'),
       },
@@ -399,7 +397,7 @@ const createWindow = async () => {
       devTools: !app.isPackaged,
       sandbox: false,
       preload:
-        app.isPackaged || !isDebug
+        app.isPackaged || !isDev
           ? path.join(__dirname, 'preload.js')
           : path.join(__dirname, '../../.erb/dll/preload.js'),
     },

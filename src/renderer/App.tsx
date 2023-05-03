@@ -59,7 +59,6 @@ const ActivateBtn = () => {
     window.electron.ipcRenderer.sendMessage('activate', [active]);
     window.electron.ipcRenderer.on('activate', (value) => {
       const state = (value as boolean[])[0];
-
       if (state !== active) {
         // state mismatch, which means the window has closed
         setActive(state);
