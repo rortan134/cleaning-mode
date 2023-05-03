@@ -202,8 +202,9 @@ const lowLevelKeyboardProc = ffi.Callback(
   }
 );
 
+const WH_KEYBOARD_LL: Param<typeof INT> = 13;
+
 const disableKeyboard = () => {
-  const WH_KEYBOARD_LL: Param<typeof INT> = 13;
   hHook = user32extended[is64bit ? 'SetWindowsHookExW' : 'SetWindowsHookExA'](
     WH_KEYBOARD_LL,
     lowLevelKeyboardProc as ref.Pointer<Buffer>,
@@ -238,7 +239,6 @@ const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
   const extensions = ['REACT_DEVELOPER_TOOLS'];
-
   return installer
     .default(
       extensions.map((name) => installer[name]),
